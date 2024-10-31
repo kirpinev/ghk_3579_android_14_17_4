@@ -13,6 +13,7 @@ import { LS, LSKeys } from "./ls";
 import { appSt } from "./style.css";
 import { ThxLayout } from "./thx/ThxLayout";
 import { Gap } from "@alfalab/core-components/gap";
+import { sendDataToGA } from "./utils/events.ts";
 
 interface Product {
   title: string;
@@ -49,20 +50,17 @@ const products: Array<Product> = [
 ];
 
 export const App = () => {
+  const [loading, setLoading] = useState(false);
   const [thxShow, setThx] = useState(LS.getItem(LSKeys.ShowThx, false));
 
-  const clickSubmit = () => {
-    // window.gtag("event", "connect_click", {
-    //   variant_name: "ghk_3579_android_14_17_4",
-    // });
-  };
-
   const submit = () => {
-    clickSubmit();
-    LS.setItem(LSKeys.ShowThx, true);
-    setThx(true);
+    setLoading(true);
+    sendDataToGA().then(() => {
+      LS.setItem(LSKeys.ShowThx, true);
+      setThx(true);
+      setLoading(false);
+    });
   };
-
   if (thxShow) {
     return <ThxLayout />;
   }
@@ -146,7 +144,7 @@ export const App = () => {
       <Gap size={72} />
 
       <div className={appSt.bottomBtn}>
-        <ButtonMobile block view="primary" onClick={submit}>
+        <ButtonMobile loading={loading} block view="primary" onClick={submit}>
           Подключить
         </ButtonMobile>
       </div>
